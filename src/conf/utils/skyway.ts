@@ -1,13 +1,18 @@
-import Peer, { SfuRoom } from "skyway-js";
+import Peer, { SfuRoom, PeerCredential } from "skyway-js";
 
-export const initPeer = (forceTurn: boolean): Promise<Peer> => {
+export const initPeer = (
+  forceTurn: boolean,
+  peerId: string,
+  credential: PeerCredential
+): Promise<Peer> => {
   return new Promise((resolve, reject) => {
-    const peer = new Peer({
-      key: "",
+    const peer = new Peer(peerId, {
+      key: "<YOUR_SKYWAY_API_KEY>",
       debug: 2,
       config: {
         iceTransportPolicy: forceTurn ? "relay" : "all",
       },
+      credential,
     });
 
     peer.once("open", () => {
