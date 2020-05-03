@@ -3,45 +3,36 @@ import { useState } from "react";
 import { FunctionComponent } from "react";
 import { css } from "@emotion/core";
 import { globalColors } from "../../shared/global-style";
-import {
-  maxRoomIdLength,
-  roomIdRe,
-  isValidRoomId,
-} from "../../shared/validate";
 import { RoomInit } from "../utils/types";
 
 interface Props {
   onSubmit: (init: RoomInit) => void;
 }
 const RoomCreate: FunctionComponent<Props> = (props) => {
-  const [roomId, setRoomId] = useState("");
+  const [targetUid, setTargetUid] = useState("");
   const [roomType, setRoomType] = useState("sfu");
-  const [isRoomIdValid, setRoomIdValid] = useState(true);
 
   return (
     <form
       css={wrapperStyle}
       onSubmit={(ev) => {
         ev.preventDefault();
-        props.onSubmit({ mode: roomType as RoomInit["mode"], id: roomId });
+        props.onSubmit({ mode: roomType as RoomInit["mode"], targetUid });
       }}
     >
       <div css={itemStyle}>
-        <div>ROOM ID</div>
+        <div>TARGET UID</div>
         <input
           type="text"
-          value={roomId}
-          placeholder="room-name"
-          onChange={(ev) => setRoomId(ev.target.value)}
-          onBlur={() => setRoomIdValid(isValidRoomId(roomId))}
+          value={targetUid}
+          placeholder="target uid"
+          onChange={(ev) => setTargetUid(ev.target.value)}
           required
-          maxLength={maxRoomIdLength}
-          pattern={roomIdRe}
           css={roomIdStyle}
         />
       </div>
       <span css={tipStyle}>
-        {isRoomIdValid ? "" : "half width, 4~16 characters are required!"}
+        {targetUid !== "" ? "" : "target uid is required!"}
       </span>
 
       <div css={itemStyle}>
@@ -66,7 +57,7 @@ const RoomCreate: FunctionComponent<Props> = (props) => {
         <button
           css={createButtonStyle}
           type="submit"
-          disabled={!isValidRoomId(roomId)}
+          disabled={targetUid === ""}
         >
           CREATE ROOM
         </button>
