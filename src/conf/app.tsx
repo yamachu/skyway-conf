@@ -14,6 +14,7 @@ import ErrorDetail from "./components/error-detail";
 import Main from "./components/main";
 import LeftBottom from "./components/left-bottom";
 import RightMenu from "./components/right-menu";
+import { AuthProvider } from "../shared/auth-provider";
 
 interface State {
   err: Error | null;
@@ -35,31 +36,33 @@ class App extends React.Component<{}, State> {
 
     return (
       <Layout>
-        <Bootstrap>
-          {/* Base Layer */}
-          <Main>
-            <PinnedStream />
-          </Main>
-          <LeftBottom>
-            <LocalStream />
-          </LeftBottom>
-          <RightMenu
-            openers={[
-              <ChatOpener key="chat" />,
-              <ReactionOpener key="reaction" />,
-              <StatsOpener key="stats" />,
-              <ExitOpener key="exit" />,
-            ]}
-          >
-            <RemoteStreams />
-          </RightMenu>
+        <AuthProvider>
+          <Bootstrap>
+            {/* Base Layer */}
+            <Main>
+              <PinnedStream />
+            </Main>
+            <LeftBottom>
+              <LocalStream />
+            </LeftBottom>
+            <RightMenu
+              openers={[
+                <ChatOpener key="chat" />,
+                <ReactionOpener key="reaction" />,
+                <StatsOpener key="stats" />,
+                <ExitOpener key="exit" />,
+              ]}
+            >
+              <RemoteStreams />
+            </RightMenu>
 
-          {/* Modal Layer */}
-          <Settings />
-          <Chat />
-          <Stats />
-          <Notification />
-        </Bootstrap>
+            {/* Modal Layer */}
+            <Settings />
+            <Chat />
+            <Stats />
+            <Notification />
+          </Bootstrap>
+        </AuthProvider>
       </Layout>
     );
   }

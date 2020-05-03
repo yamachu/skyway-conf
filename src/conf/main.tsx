@@ -5,8 +5,12 @@ import debug from "debug";
 import { name, version } from "../../package.json";
 import { globalStyle } from "../shared/global-style";
 import App from "./app";
+import firebase from "firebase";
+import firebaseConfig from "../../credentials/firebase-client.json";
 
 const log = debug("main");
+
+firebase.initializeApp(firebaseConfig);
 
 (async () => {
   log(`${name} v${version}`);
