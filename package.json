@@ -36,6 +36,7 @@
     "@emotion/core": "^10.0.28",
     "bowser": "^2.9.0",
     "debug": "^4.1.1",
+    "firebase": "^7.14.2",
     "hark": "^1.2.3",
     "mobx": "^5.15.4",
     "mobx-react": "^6.2.2",
