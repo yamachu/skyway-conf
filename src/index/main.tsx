@@ -5,8 +5,13 @@ import debug from "debug";
 import { name, version } from "../../package.json";
 import { globalStyle } from "../shared/global-style";
 import App from "./app";
+import firebase from "firebase";
+import firebaseConfig from "../../credentials/firebase-client.json";
+import { AuthProvider } from "../shared/auth-provider";
 
 const log = debug("main");
+
+firebase.initializeApp(firebaseConfig);
 
 (async () => {
   log(`${name} v${version}`);
@@ -15,7 +20,9 @@ const log = debug("main");
   render(
     <React.StrictMode>
       <Global styles={globalStyle} />
-      <App />
+      <AuthProvider>
+        <App />
+      </AuthProvider>
     </React.StrictMode>,
     document.getElementById("app-root")
   );
