@@ -11,14 +11,16 @@ import {
 } from "../effects/bootstrap";
 import ErrorDetail from "../components/error-detail";
 import Loader from "../components/loader";
+import { AuthContext } from "../../shared/contexts";
 
 interface Props {
   children: ReactNode;
 }
 const Bootstrap: FunctionComponent<Props> = ({ children }: Props) => {
   const store = useContext(StoreContext);
+  const authStore = useContext(AuthContext);
 
-  useEffect(checkRoomSetting(store), [store]);
+  useEffect(checkRoomSetting(store, authStore), [store, authStore]);
   useEffect(initAudioDeviceAndClient(store), [store]);
   useEffect(listenStoreChanges(store), [store]);
   useEffect(listenGlobalEvents(store), [store]);

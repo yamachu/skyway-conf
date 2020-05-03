@@ -1,48 +1,68 @@
 import { EffectCallback } from "react";
 import { toJS, reaction, observe } from "mobx";
 import debug from "debug";
-import {
-  isValidRoomId,
-  isValidRoomType,
-  roomIdRe,
-} from "../../shared/validate";
 import { getUserDevices, getUserAudioTrack } from "../utils/webrtc";
 import { initPeer } from "../utils/skyway";
-import { RoomInit } from "../utils/types";
 import RootStore from "../stores";
+import { AuthContextValue } from "../../shared/contexts";
+import { getMeetings } from "../utils/firestore";
 
 const log = debug("effect:bootstrap");
 
-export const checkRoomSetting = ({
-  ui,
-  room,
-}: RootStore): EffectCallback => () => {
+export const checkRoomSetting = (
+  { ui, room }: RootStore,
+  authContextValue: AuthContextValue
+): EffectCallback => () => {
   log("checkRoomSetting()");
-  const [, roomType, roomId] = location.hash.split("/");
   const params = new URLSearchParams(location.search);
 
-  if (!isValidRoomType(roomType)) {
-    throw ui.showError(
-      new Error("Invalid room type! it should be `sfu` or `mesh`.")
-    );
-  }
-  if (!isValidRoomId(roomId)) {
-    throw ui.showError(
-      new Error(
-        `Invalid room name! it should be match \`${roomIdRe.toString()}\`.`
-      )
-    );
-  }
-
   (async () => {
-    const peer = await initPeer(params.has("turn")).catch((err) => {
-      throw ui.showError(err);
-    });
+    if (authContextValue === undefined || authContextValue.user === null) {
+      return;
+    }
+
+    const meetings = await getMeetings(authContextValue.user.uid);
+    if (meetings.length === 0) {
+      return;
+    }
+    const latestMeeting = meetings.sort((a, b) => {
+      const ad = a.createdAt.getUTCMinutes();
+      const bd = b.createdAt.getUTCMinutes();
+      if (ad < bd) {
+        return 1;
+      } else if (ad > bd) {
+        return -1;
+      }
+      return 0;
+    })[0];
+
+    const token = await authContextValue.user.getIdToken();
+    const peerUserId = authContextValue.user.uid;
+    const roomId = latestMeeting.roomId;
+    const roomType = latestMeeting.roomType;
+    const peerId = `${roomId}_${peerUserId}`;
+
+    const peer = await fetch("http://localhost:8080/authenticate", {
+      method: "POST",
+      body: JSON.stringify({
+        peerId,
+      }),
+      headers: new Headers([
+        ["Authorization", `Bearer ${token}`],
+        ["Content-Type", "application/json"],
+      ]),
+      mode: "cors",
+    })
+      .then((v) => v.json())
+      .then((credential) => initPeer(params.has("turn"), peerId, credential))
+      .catch((err) => {
+        throw ui.showError(err);
+      });
     // just log it, do not trust them
     peer.on("error", console.error);
     room.load(
       {
-        mode: roomType as RoomInit["mode"],
+        mode: roomType,
         id: roomId,
         useH264: params.has("h264"),
       },
